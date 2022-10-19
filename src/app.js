@@ -3,12 +3,12 @@ import { Server } from "socket.io";
 
 const httpServer = createServer();
 
-const messages = [];
+let messages = [];
 
 
 const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:3000"
+        origin: "*"
     }
 });
 
@@ -17,8 +17,14 @@ io.on("connection", (socket) => {
 
     socket.on("message", (msg)=>{
         console.log("Nova mensagem! -->", msg)
-        messages.push({...msg, createdAt: new Date()})
-        io.emit("message", {...msg, createdAt: new Date()});
+        messages.push({...msg, createdAt: new Date(), readed: false})
+        io.emit("message", messages);
+    })
+
+    socket.on("read", (msg)=>{
+        // messages.push({...msg, createdAt: new Date(), readed: false})
+        messages = messages.map(msg => ({...msg, readed: true}));
+        io.emit("message", messages);
     })
 });
 
